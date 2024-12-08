@@ -5,7 +5,6 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.seconds
 
@@ -23,7 +22,7 @@ fun Application.configureSockets() {
         webSocket("/ws") { // websocketSession
 //            val clientId = UUID.randomUUID().toString()
 
-            val clientId = call.request.queryParameters["clientId"]
+            val clientId = call.request.headers["Client-Id"]
             if (clientId.isNullOrEmpty()) {
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Missing clientId"))
                 return@webSocket
