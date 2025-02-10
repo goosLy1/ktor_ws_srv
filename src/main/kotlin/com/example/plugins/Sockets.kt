@@ -5,13 +5,16 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.seconds
 
 fun Application.configureSockets() {
     install(WebSockets) {
-        pingPeriod = 15.seconds
-        timeout = 15.seconds
+        pingPeriod = 30.seconds
+        timeout = 60.seconds
         maxFrameSize = Long.MAX_VALUE
         masking = false
     }
@@ -33,6 +36,14 @@ fun Application.configureSockets() {
 
             try {
                 send("Your client ID: $clientId")
+
+                launch {
+                    while (isActive) {
+                        delay(20.seconds)
+                        send(Frame.Text("ping"))
+                    }
+                }
+
 
                 incoming.consumeEach { frame ->
                     if (frame is Frame.Text) {
