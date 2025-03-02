@@ -1,4 +1,5 @@
 # Stage 1: Cache Gradle dependencies
+# Stage 1: Cache Gradle dependencies
 FROM gradle:latest AS cache
 RUN mkdir -p /home/gradle/cache_home
 ENV GRADLE_USER_HOME /home/gradle/cache_home
