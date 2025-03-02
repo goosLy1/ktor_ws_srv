@@ -1,25 +1,25 @@
-# Этап 1: Сборка fat JAR с использованием Gradle
-FROM gradle:8.7-alpine AS builder
-WORKDIR /app
-
-# Копируем исходный код и Gradle файлы
-COPY . .
-
-# Собираем fat JAR
-RUN gradle shadowJar --no-daemon -Dorg.gradle.jvmargs="-Xmx512m"
-
-
-# Этап 2: Финальный образ с Java и готовым JAR
-FROM amazoncorretto:22
-EXPOSE 8080
-
-WORKDIR /app
-
-# Копируем fat JAR из предыдущего этапа
-COPY --from=builder /app/build/libs/*.jar app.jar
-
-# Запуск приложения
-ENTRYPOINT ["java", "-jar", "app.jar"]
+## Этап 1: Сборка fat JAR с использованием Gradle
+#FROM gradle:8.7-alpine AS builder
+#WORKDIR /app
+#
+## Копируем исходный код и Gradle файлы
+#COPY . .
+#
+## Собираем fat JAR
+#RUN gradle shadowJar --no-daemon -Dorg.gradle.jvmargs="-Xmx512m"
+#
+#
+## Этап 2: Финальный образ с Java и готовым JAR
+#FROM amazoncorretto:22
+#EXPOSE 8080
+#
+#WORKDIR /app
+#
+## Копируем fat JAR из предыдущего этапа
+#COPY --from=builder /app/build/libs/*.jar app.jar
+#
+## Запуск приложения
+#ENTRYPOINT ["java", "-jar", "app.jar"]
 
 
 
@@ -49,8 +49,8 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 #COPY --from=build /home/gradle/src/build/libs/*.jar /app/ktor-docker-sample.jar
 #ENTRYPOINT ["java","-jar","/app/ktor-docker-sample.jar"]
 
-#FROM amazoncorretto:22
-#EXPOSE 8080:8080
-#WORKDIR /app
-#COPY build/libs/fat.jar app.jar
-#ENTRYPOINT ["java","-jar","app.jar"]
+FROM amazoncorretto:22
+EXPOSE 8080:8080
+WORKDIR /app
+COPY build/libs/fat.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
