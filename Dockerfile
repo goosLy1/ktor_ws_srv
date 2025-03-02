@@ -6,7 +6,8 @@ WORKDIR /app
 COPY . .
 
 # Собираем fat JAR
-RUN gradle shadowJar --no-daemon
+RUN gradle shadowJar --no-daemon -Dorg.gradle.jvmargs="-Xmx512m"
+
 
 # Этап 2: Финальный образ с Java и готовым JAR
 FROM amazoncorretto:22
