@@ -1,5 +1,5 @@
 # Этап 1: Сборка fat JAR с использованием Gradle
-FROM gradle:8.4-jdk22 AS builder
+FROM gradle:8.7-alpine AS builder
 WORKDIR /app
 
 # Копируем исходный код и Gradle файлы
