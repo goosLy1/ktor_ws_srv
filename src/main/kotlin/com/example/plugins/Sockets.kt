@@ -39,6 +39,7 @@ fun Application.configureSockets() {
 
             connections[clientId] = this
             println("Client $clientId connected")
+            println("Test issue")
 
             try {
 //                send("Your client ID: $clientId")
