@@ -50,7 +50,7 @@
 #ENTRYPOINT ["java","-jar","/app/ktor-docker-sample.jar"]
 
 FROM amazoncorretto:22
-EXPOSE 8084:8084
+EXPOSE 8085:8085
 WORKDIR /app
 COPY build/libs/fat.jar app.jar
 ENTRYPOINT ["java","-jar","app.jar"]

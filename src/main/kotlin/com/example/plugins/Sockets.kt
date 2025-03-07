@@ -7,7 +7,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import kotlinx.coroutines.channels.consumeEach
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -58,43 +58,43 @@ fun Application.configureSockets() {
                     }
                 }
 
-                incoming.consumeEach { frame ->
-                    try {
-                        if (frame is Frame.Text) {
-                            val message = receiveDeserialized<WebsocketMessage>()
-                            println("Received from $clientId: $message")
-
-                            connections[message.clientId]?.sendSerialized(
-                                WebsocketMessage(
-                                    clientId,
-                                    message.command,
-                                    message.data
-                                )
-                            )
-                        } else {
-                            throw SerializationException("Invalid frame type: expected Frame.Text")
-                        }
-                    } catch (e: SerializationException) {
-                        sendSerialized(WebsocketMessage(clientId, "error", "invalid json"))
-                    } catch (e: Exception) {
-                        println("Error processing message from $clientId: ${e.message}")
-                        throw e
-                    }
-                }
-
-
-//                while (true) {
-//                    val message = receiveDeserialized<WebsocketMessage>()
-//                    println("Received from $clientId: $message")
+//                incoming.consumeEach { frame ->
+//                    try {
+//                        if (frame is Frame.Text) {
+//                            val message = receiveDeserialized<WebsocketMessage>()
+//                            println("Received from $clientId: $message")
 //
-//                    connections[message.clientId]?.sendSerialized(
-//                        WebsocketMessage(
-//                            clientId,
-//                            message.command,
-//                            message.data
-//                        )
-//                    )
+//                            connections[message.clientId]?.sendSerialized(
+//                                WebsocketMessage(
+//                                    clientId,
+//                                    message.command,
+//                                    message.data
+//                                )
+//                            )
+//                        } else {
+//                            throw SerializationException("Invalid frame type: expected Frame.Text")
+//                        }
+//                    } catch (e: SerializationException) {
+//                        sendSerialized(WebsocketMessage(clientId, "error", "invalid json"))
+//                    } catch (e: Exception) {
+//                        println("Error processing message from $clientId: ${e.message}")
+//                        throw e
+//                    }
 //                }
+
+
+                while (true) {
+                    val message = receiveDeserialized<WebsocketMessage>()
+                    println("Received from $clientId: $message")
+
+                    connections[message.clientId]?.sendSerialized(
+                        WebsocketMessage(
+                            clientId,
+                            message.command,
+                            message.data
+                        )
+                    )
+                }
 
 //                incoming.consumeEach { frame ->
 //                    if (frame is Frame.Text) {
@@ -112,6 +112,8 @@ fun Application.configureSockets() {
 //                        }
 //                    }
 //                }
+            } catch (e: SerializationException) {
+                sendSerialized(WebsocketMessage(clientId, "error", "invalid json"))
             } catch (e: ClosedReceiveChannelException) {
                 println("Client $clientId disconnected normally")
             } catch (e: Exception) {
