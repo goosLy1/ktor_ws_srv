@@ -53,7 +53,7 @@ fun Application.configureSockets() {
                             sendSerialized(WebsocketMessage(clientId, "ping"))
                         } catch (e: Exception) {
                             println("Failed to send ping to $clientId: ${e.message}")
-                            break
+                            throw e
                         }
                     }
                 }
