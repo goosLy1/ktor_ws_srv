@@ -43,7 +43,12 @@ fun Application.configureSockets() {
         webSocket("/ws") { // websocketSession
 //            val clientId = UUID.randomUUID().toString()
 
-            val clientId = call.request.headers["Client-Id"]
+            var clientId = call.request.headers["Client-Id"]
+
+            if (clientId.isNullOrEmpty()) {
+                clientId = call.request.queryParameters["Client-Id"]
+            }
+
             if (clientId.isNullOrEmpty()) {
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Missing clientId"))
                 return@webSocket
