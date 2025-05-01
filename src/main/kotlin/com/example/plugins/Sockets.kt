@@ -1,8 +1,10 @@
 package com.example.plugins
 
 import com.example.WebsocketMessage
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
@@ -23,6 +25,16 @@ fun Application.configureSockets() {
         maxFrameSize = Long.MAX_VALUE
         masking = false
         contentConverter = KotlinxWebsocketSerializationConverter(Json { ignoreUnknownKeys = true })
+    }
+    install(CORS) {
+        anyHost()
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader("Client-Id")
+        allowMethod(HttpMethod.Options) // Важно для preflight запросов
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
     }
 
     val connections = ConcurrentHashMap<String, DefaultWebSocketServerSession>()
