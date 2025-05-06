@@ -37,25 +37,27 @@ fun Application.configureSockets() {
         allowMethod(HttpMethod.Delete)
     }
 
-    val connections = ConcurrentHashMap<String, DefaultWebSocketServerSession>()
+    val connections = ConcurrentHashMap<String, MutableSet<DefaultWebSocketServerSession>>()
 
     routing {
         webSocket("/ws") { // websocketSession
 //            val clientId = UUID.randomUUID().toString()
 
-            var clientId = call.request.headers["Client-Id"]
+            val clientId = call.request.headers["Client-Id"] ?: call.request.queryParameters["Client-Id"]
 
-            if (clientId.isNullOrEmpty()) {
-                clientId = call.request.queryParameters["Client-Id"]
-            }
+//            if (clientId.isNullOrEmpty()) {
+//                clientId = call.request.queryParameters["Client-Id"]
+//            }
 
             if (clientId.isNullOrEmpty()) {
                 close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Missing clientId"))
                 return@webSocket
             }
 
-            connections[clientId] = this
-            println("Client $clientId connected")
+            connections.computeIfAbsent(clientId) {
+                ConcurrentHashMap.newKeySet()
+            }.add(this)
+            println("Client $clientId connected. Total connections for this client: ${connections[clientId]?.size}")
 
 
             try {
@@ -104,13 +106,21 @@ fun Application.configureSockets() {
                     val message = receiveDeserialized<WebsocketMessage>()
                     println("Received from $clientId: $message")
 
-                    connections[message.clientId]?.sendSerialized(
-                        WebsocketMessage(
-                            clientId,
-                            message.command,
-                            message.data
-                        )
-                    )
+                    connections[message.clientId]?.forEach { session ->
+                        try {
+                            session.sendSerialized(
+                                WebsocketMessage(
+                                    clientId,
+                                    message.command,
+                                    message.data
+                                )
+                            )
+                        } catch (e: Exception) {
+                            throw e
+                        }
+                    }
+
+
                 }
 
 //                incoming.consumeEach { frame ->
@@ -136,8 +146,11 @@ fun Application.configureSockets() {
             } catch (e: Exception) {
                 println("Client $clientId disconnected with error: ${e.message}")
             } finally {
-                connections.remove(clientId)
-                println("Client $clientId disconnected")
+                connections[clientId]?.remove(this)
+                if (connections[clientId]?.isEmpty() == true) {
+                    connections.remove(clientId)
+                }
+                println("Client $clientId disconnected. Remaining connections for this client: ${connections[clientId]?.size ?: 0}")
             }
         }
     }
