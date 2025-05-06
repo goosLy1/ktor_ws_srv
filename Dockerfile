@@ -49,7 +49,7 @@
 #COPY --from=build /home/gradle/src/build/libs/*.jar /app/ktor-docker-sample.jar
 #ENTRYPOINT ["java","-jar","/app/ktor-docker-sample.jar"]
 
-FROM amazoncorretto:22-alpine
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:22
 EXPOSE 443
 WORKDIR /app
 COPY build/libs/fat.jar app.jar
